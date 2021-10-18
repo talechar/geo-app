@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <b-modal v-model="isShow" @hide="onClose">
+    <span slot="modal-header">{{ $route.meta.title }}</span>
     <b-form-group
         id="form-group-1"
         label="Адрес:"
@@ -16,7 +17,7 @@
         id="form-group-2"
         label="Местоположение:"
     >
-      <Map height="250px" @click="getCoordinate"/>
+      <Map height="250px" @click="getCoordinate" :statements="statements" :single-marker="true" />
     </b-form-group>
 
     <b-form-group id="form-group-3" label="Тип аварии:" label-for="accident">
@@ -60,7 +61,11 @@
           required
       ></b-form-input>
     </b-form-group>
-  </div>
+    <template #modal-footer="{ close }">
+      <b-button @click="close()">Закрыть</b-button>
+      <b-button class="m-lg-1" @click="onSubmit">{{ editable ? 'Редактировать' : 'Создать' }}</b-button>
+    </template>
+  </b-modal>
 </template>
 
 <script>
@@ -74,8 +79,11 @@ export default {
   name: 'StatementForm',
   data() {
     return {
+      isShow: true,
+      editable: !!this.$route.params.id,
       types: this.$store.getters.getTypes,
       priorities: this.$store.getters.getPriorities,
+      statements: [],
       data: {
         address: '',
         location: null,
@@ -87,11 +95,20 @@ export default {
     };
   },
   methods: {
-    submit() {
-      this.$store.dispatch('setStatement', {
-        id: uuid.nextUuid(),
-        ...this.data,
-      });
+    onSubmit() {
+      if (this.editable) {
+        this.$store.dispatch('updateStatement', this.data);
+      } else {
+        this.$store.dispatch('pushStatement', {
+          id: uuid.nextUuid(),
+          ...this.data,
+        });
+      }
+
+      this.isShow = false;
+    },
+    onClose() {
+      this.$router.push({ name: 'statement-view' });
     },
     getCoordinate(coordinate) {
       this.data.location = coordinate;
@@ -99,6 +116,7 @@ export default {
     fillForm() {
       const statement = this.$store.getters.getStatementById(this.$route.params.id);
       this.data = { ...this.data, ...statement };
+      this.statements.push(statement);
     },
   },
   components: {

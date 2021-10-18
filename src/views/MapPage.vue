@@ -1,5 +1,5 @@
 <template>
-<Map/>
+  <Map :statements="statements" />
 </template>
 
 <script>
@@ -9,6 +9,11 @@ export default {
   name: 'MapPage',
   components: {
     Map,
+  },
+  data() {
+    return {
+      statements: this.$store.getters.getStatements,
+    };
   },
 };
 </script>

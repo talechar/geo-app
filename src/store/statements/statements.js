@@ -3,13 +3,20 @@ export default {
     statements: [],
   },
   mutations: {
-    setStatement(state, statement) {
+    pushStatement(state, statement) {
       state.statements.push(statement);
+    },
+    updateStatementById(state, statement) {
+      const idx = state.statements.findIndex((s) => s.id === statement.id);
+      state.statements.splice(idx, 1, statement);
     },
   },
   actions: {
-    setStatement({ commit }, statement) {
-      commit('setStatement', statement);
+    pushStatement({ commit }, statement) {
+      commit('pushStatement', statement);
+    },
+    updateStatement({ commit }, statement) {
+      commit('updateStatementById', statement);
     },
   },
 
